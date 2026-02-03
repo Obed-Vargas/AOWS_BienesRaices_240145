@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
     })
 })
 
-app.get("/", (req, res) => {
+app.get("/login", (req, res) => {
     console.log("El usuario desea acceder al sistema");
     res.status(200).send(`<h1>Bienvenido al sistema</h1>
  <form>
@@ -22,13 +22,11 @@ app.get("/", (req, res) => {
     );
 })
 
-app.get("Saludo/:nombre", (req, res) => 
-    {
-        const nombre = req.params;
-    console.log(`El usuario: ${nombre}`);
-    res.status(200).send(`<p>Bienvenido <b>${nombre}</b></p>`
-    );
-});
+app.get("/saludo/:nombre", (req, res) => {
+    const { nombre } = req.params;
+    console.log(`El usuario: ${nombre}`)
+    res.status(200).send(`<p>Bienvenido <b>${nombre}</b></p> </h1`)
+})
 
 app.listen(PORT, () => {
     console.log(`El servidor esta iniciando en el puerto ${PORT}`);
