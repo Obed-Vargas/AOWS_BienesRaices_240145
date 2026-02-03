@@ -36,9 +36,9 @@ El proyecto estar basado en una Arquitectura SOA (Service Oriental Architecture)
 |23|Publicacion del API y el frontend   |❌   | ❌  |
 
 ## Resultados obtenidos:
-...
+```
 Posteriormente se ubicaran imagenes del proyecto
-...
+```
 
 ### Creado por:
 Obed Vargas Luna - 240145
