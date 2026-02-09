@@ -35,6 +35,7 @@ El proyecto estar basado en una Arquitectura SOA (Service Oriental Architecture)
 |22|Barras de Navegacion y cierre de sesion   |❌   | ❌  |
 |23|Publicacion del API y el frontend   |❌   | ❌  |
 
+
 ## Resultados obtenidos:
 ```
 Posteriormente se ubicaran imagenes del proyecto
