@@ -12,7 +12,7 @@ El proyecto estar basado en una Arquitectura SOA (Service Oriental Architecture)
 | No. | Descripción | Potenciador | Estatus |
 |-----|-------------|------------|---------|
 |1|Configuración inicial del proyecto (NodeJS) | ✅ | ✅  |
-|2|Routing y request (Particiones)  | ❌ | ❌  |
+|2|Routing y request (Particiones)  | ✅ | ✅  |
 |3|Layouts, Template Engines y Tailwind (frontemd) | ❌ | ❌  |
 |4|Creacion de paginas login y creacion de usuarios|  ❌ | ❌  |
 |5|ORM´s y Base de datos|  ❌ | ❌  |
