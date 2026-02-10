@@ -63,8 +63,8 @@ router.put("/updateUser", (req,res) => {
  console.log("Se a solicitado la actualizacion de datos del usuario, tiempo PUT una actualizacion completa");
  console.log("Procesando una peticion de tipo PUT")
     const usuario={
-        nombre: "Jose maria castillo",
-        correo: "jmca2011@gmail.com"
+        nombre: "Obed Vargas Luna",
+        correo: "obed@gmail.com"
     }
  const usuarioActualizado={
         nombre: "francisco Ojeda",
@@ -82,8 +82,8 @@ router.patch("/updatePassword/:nuevoPassword", (req,res) => {
  console.log("Se a solicitado la actualizacion de datos de la contraseña, siendo PATCH una actualizacion parcial");
  console.log("Procesando una peticion de tipo PATCH")
     const usuario={
-        nombre: "Jose maria castillo",
-        correo: "jmca2011@gmail.com",
+        nombre: "Obed Vargas Luna",
+        correo: "obed@gmail.com",
         password: "abcde"
     }
     const nuevoPassword=req.params.nuevoPassword;
