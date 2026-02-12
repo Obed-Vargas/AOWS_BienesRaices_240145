@@ -40,8 +40,8 @@ router.post("/createUser", (req, res) => {
     console.log("Se a solicitado una creacion de usuario");
     const nuevoUsuario =
     {
-        nombre: "Jose maria castillo",
-        correo: "jmca2011@gmail.com"
+        nombre: "Obed Vargas Luna",
+        correo: "obed@gmail.com"
     }
 
     res.json({

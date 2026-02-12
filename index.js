@@ -7,6 +7,9 @@ const app = express();
 app.set("view engine", "pug")
 app.set("views", "./views")
 
+//Definimos la carpeta publica
+app.use(express.static('public'))
+
 app.use("/auth",usuarioRoutes)
 
 app.get("/",usuarioRoutes)
