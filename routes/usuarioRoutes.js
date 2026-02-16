@@ -1,8 +1,9 @@
 import express from "express";
+import { formularioLogin, formularioRegistro } from "../controllers/usuarioController.js";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/", (req, res) => { 
     console.log("Bienvenido al sistema de raices");
     console.log("Procesando una peticion de tipo GET")
     res.json({
@@ -13,11 +14,8 @@ router.get("/", (req, res) => {
 
 
 
-router.get("/login", (req, res) => {
-    res.render('auth/login', {
-        autenticado: true
-    });
-});
+router.get("/login", formularioLogin);
+router.get("/registro", formularioRegistro);
 
 router.get("/saludo/:nombre", (req, res) => {
     const { nombre } = req.params;
