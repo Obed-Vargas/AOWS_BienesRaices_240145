@@ -1,7 +1,32 @@
-extends ../layout/index.pug
+extends ../layout/index
 
-block contenido
-    div 
-        h2.text-center.font-extrabold.text-2xl.text-blue-500 Crea tu cuenta
-    p.text-center.text-lg.text-gray-500 Porfavor ingresa cuidadosamente tus datos:
+block contenido 
+    .py-10
+        h1.text-4xl.my-10.font-extrabold.text-center.text-blue-600  Bienes
+            span.font-normal.text-black Raíces
+        h2.text-center.text-2xl.font-normal.text-black Por favor ingresa cuidadosamente tus datos
 
+        .mt-8.mx-auto.max-w-xl 
+            .bg-white.py-8.px-4.shadow-2xl.rounded-2xl
+                form.space-y-5
+                    div.px-5
+                        label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="nombreUsuario") nombre completo:
+                        input#nombreUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "p.e.: Obed Vargas Luna" name="nombreUsuario" type="text")
+
+                    div.px-5
+                        label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="emailUsuario") correo electrónico:
+                        input#emailUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "p.e.: usuario@dominio.com" name="emailUsuario" type="email")
+                    
+                    div.px-5
+                        label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="passwordUsuario") Contraseña:
+                        input#passwordUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "Por lo menos 8 caracteres" name="passwordUsuario" type="password")
+
+                    div.px-5
+                        label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="confirmacionUsuario") Confirmación de Contraseña:
+                        input#confirmacinUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "Repite la contraseña anterior" name="confirmacionUsuario" type="password")
+
+                    input(class= "w-full bg-gray-300 text-blue-500 hover:bg-blue-600 hover:text-white font-bold py-3 cursor-pointer rounded-4xl shadow-lg uppercase" type="submit" value= "Registrar Usuario")
+
+                    div.flex.items-center.justify-between.pt-3
+                        a(class="text-gray-500 text-sm hover:decoration-blue-400 hover:underline transition decoration-2" href="/auth/login") ¿Ya tienes cuenta? Inicia Sesión
+                        a(class="text-gray-500 text-sm hover:decoration-blue-400 hover:underline transition decoration-2" href="") ¿Olvidaste tu contraseña? Recuperala
