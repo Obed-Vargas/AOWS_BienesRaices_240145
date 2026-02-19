@@ -1,8 +1,44 @@
 extends ../layout/index.pug
 
-block contenido
-    div 
-        h2.text-center.font-extrabold.text-2xl.text-blue-500 Login
-    p.text-center.text-lg.text-gray-500 Inicia sesion 
+block contenido 
+    .py-10
+        h1.text-4xl.my-10.font-extrabold.text-center.text-indigo-600  Bienes
+            span.font-normal.text-black Raíces
+        h2.text-center.text-2xl.font-normal.text-black= pagina
+
+        .mt-8.mx-auto.max-w-xl 
+            .bg-white.py-8.px-4.shadow-2xl.rounded-2xl
+                form.space-y-5
+                    div.px-5
+                        label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="emailUsuario") correo electrónico:
+                        input#emailUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "p.e.: usuario@dominio.com" name="emailUsuario" type="email")
+                    
+                    div.px-5
+                        label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="passwordUsuario") Contraseña:
+                        div.relative
+                            input#passwordUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "Tu contraseña" name="passwordUsuario" type="password")
+                            button#mostrarPassword.absolute.right-3.top-2.text-gray-400.cursor-pointer(type="button")
+                                svg.h-6.w-6(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.644C3.799 8.363 7.727 6 12 6c4.273 0 8.201 2.363 9.964 5.678a1.012 1.012 0 0 1 0 .644C20.201 15.637 16.273 18 12 18c-4.273 0-8.201-2.363-9.964-5.678Z")
+                                    path(stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z")
+
+                    input(class= "w-full bg-indigo-600 text-white hover:bg-purple-600 transition-colors font-bold py-3 cursor-pointer rounded-4xl shadow-lg uppercase" type="submit" value= "Iniciar Sesión")
+
+                    div.flex.items-center.justify-between.pt-3
+                        a(class="text-gray-500 text-sm hover:decoration-pink-400 hover:text-pink-600 hover:underline transition decoration-2" href="/auth/registro") ¿No tienes cuenta? Registrate
+                        a(class="text-gray-500 text-sm hover:decoration-pink-400 hover:text-pink-600 hover:underline transition decoration-2" href="/auth/olvide-password") ¿Olvidaste tu contraseña? Recuperala
+
+block scripts 
+    script.
+        const mostrarPassword = document.querySelector('#mostrarPassword');
+        const passwordInput = document.querySelector('#passwordUsuario');
+
+        mostrarPassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Optional: change icon color or path to indicate state
+            mostrarPassword.classList.toggle('text-indigo-600');
+        });
 
 
