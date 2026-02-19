@@ -7,9 +7,16 @@ html(lang="es")
         title .: BienesRaices :. 240145 | #{pagina}
         link(rel="stylesheet", href="/css/styles.css")
         
-    body.min-h-screen.bg-gray-100
-        main(class="mx-auto container mx-10 px-2")
+    body.min-h-screen.bg-gray-100.flex.flex-col
+        main(class="mx-auto container mt-10 px-2 flex-grow")
             block contenido
+
+        footer.py-10
+            .container.mx-auto.flex.flex-col.items-center.justify-center.space-y-4
+                p.text-center.text-gray-500.font-bold.uppercase Bienes 
+                    span.font-normal Raíces
+                p.text-center.text-gray-400.text-sm &copy; 2026 Todos los derechos reservados
+                p.text-center.text-indigo-600.font-semibold.text-xs 240145 | Obed Vargas Luna
 
         block scripts
         
