@@ -14,7 +14,7 @@ El proyecto estar basado en una Arquitectura SOA (Service Oriental Architecture)
 |1|Configuración inicial del proyecto (NodeJS) | ✅ | ✅ finalizado  |
 |2|Routing y request (Particiones)  | ✅ | ✅ finalizado  |
 |3|Layouts, Template Engines y Tailwind (frontemd) | ✅ | ✅ finalizado  |
-|4|Creacion de paginas login y creacion de usuarios|  ❌ | ❌  |
+|4|Creacion de paginas login y creacion de usuarios|  ✅ | ✅ finalizado  |
 |5|ORM´s y Base de datos|  ❌ | ❌  |
 |6|Insertando registros en la tabla de usuarios|  ❌ | ❌  |
 |7|Implementacion de la funcionalidad (Feature), Recuperacion de contraseña (Password recovery)|  ❌ | ❌  |
