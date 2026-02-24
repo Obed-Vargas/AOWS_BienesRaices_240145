@@ -8,7 +8,7 @@ block contenido
 
         .mt-8.mx-auto.max-w-xl 
             .bg-white.py-8.px-4.shadow-2xl.rounded-2xl
-                form.space-y-5
+                form.space-y-5(method="POST" action="/auth/registro")
                     div.px-5
                         label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="nombreUsuario") nombre completo:
                         input#nombreUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "p.e.: Obed Vargas Luna" name="nombreUsuario" type="text")

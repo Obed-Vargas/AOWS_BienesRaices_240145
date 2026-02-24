@@ -10,6 +10,7 @@ app.set("views", "./views")
 
 //Definimos la carpeta publica
 app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }))
 
 app.use("/auth", usuarioRoutes)
 
