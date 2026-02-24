@@ -1,7 +1,11 @@
 import express from "express";
-import { formularioLogin, formularioRegistro, formularioOlvidePassword } from "../controllers/usuarioController.js";
+import { formularioLogin, formularioRegistro, formularioOlvidePassword, registrarUsuario } from "../controllers/usuarioController.js";
 
 const router = express.Router();
+
+
+//POST
+router.post("/registro", registrarUsuario);
 
 router.get("/", (req, res) => {
     console.log("Bienvenido al sistema de raices");
@@ -17,6 +21,7 @@ router.get("/", (req, res) => {
 router.get("/login", formularioLogin);
 router.get("/registro", formularioRegistro);
 router.get("/olvide-password", formularioOlvidePassword);
+
 
 router.get("/saludo/:nombre", (req, res) => {
     const { nombre } = req.params;

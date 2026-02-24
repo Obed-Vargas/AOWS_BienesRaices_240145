@@ -14,9 +14,9 @@ const {
 } = process.env;
 
 const sequelize = new Sequelize(
-    DB_NAME, 
-    DB_USER, 
-    DB_PASSWORD, 
+    DB_NAME,
+    DB_USER,
+    DB_PASSWORD,
     {
         host: DB_HOST,
         port: DB_PORT,
@@ -51,7 +51,14 @@ export const connectDB = async () => {
         console.log("✅ Conexión a MySQL establecida correctamente.");
     } catch (error) {
         console.error("❌ No se pudo conectar a la base de datos:", error);
-        process.exit(1); // Salir del proceso con error
+        process.exit(1);
+    }
+
+    try {
+        await sequelize.sync({ alter: true });
+        console.log("✅ Modelos sincronizados con la base de datos.");
+    } catch (syncError) {
+        console.warn("⚠️  No se pudo sincronizar modelos (revisa permisos de DB):", syncError.message);
     }
 };
 
