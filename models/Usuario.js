@@ -36,13 +36,10 @@ const Usuario = db.define('Usuario', {
     },
     password: {
         type: DataTypes.STRING(225),
-        allowNull: false,
+        allowNull: true,
         validate: {
-            notEmpty: {
-                msg: 'La contraseña no puede estar vacio'
-            },
             len: {
-                args: [8, 100],
+                args: [0, 100],
                 msg: 'La contraseña debe tener al menos 8 caracteres'
             }
         }
@@ -71,6 +68,21 @@ const Usuario = db.define('Usuario', {
         type: DataTypes.DATE,
         allowNull: true,
         field: 'ultimo_acceso'
+    },
+    proveedor: {
+        type: DataTypes.ENUM('local', 'google', 'github'),
+        defaultValue: 'local',
+        allowNull: false,
+        field: 'proveedor'
+    },
+    proveedorId: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        field: 'proveedor_id'
+    },
+    foto: {
+        type: DataTypes.STRING(255),
+        allowNull: true
     }
 
 

@@ -1,26 +1,63 @@
 import express from "express";
-import { formularioLogin, formularioRegistro, formularioOlvidePassword, registrarUsuario } from "../controllers/usuarioController.js";
+import passport from "passport";
+import { formularioLogin, formularioRegistro, formularioPassword, registrarUsuario } from "../controllers/usuarioController.js";
 
 const router = express.Router();
+
+// ─── Rutas Google OAuth ────────────────────────────────────────────────────
+router.get('/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+router.get('/google/callback',
+    passport.authenticate('google', { failureRedirect: '/auth/registro' }),
+    (req, res) => res.redirect('/')
+);
+
+// ─── Rutas GitHub OAuth ────────────────────────────────────────────────────
+router.get('/github',
+    passport.authenticate('github', { scope: ['user:email'], prompt: 'login' })
+);
+router.get('/github/callback',
+    passport.authenticate('github', { failureRedirect: '/auth/registro' }),
+    (req, res) => res.redirect('/auth/perfil')
+);
+
+// ─── Ruta de Perfil Detallado ─────────────────────────────────────────────
+router.get('/perfil', (req, res) => {
+    if (!req.user) return res.redirect('/auth/login');
+    res.render('auth/perfil', {
+        pagina: 'Mi Perfil de GitHub',
+        usuario: req.user
+    });
+});
+
+// --- Fin rutas OAuth ---
+
 
 
 //POST
 router.post("/registro", registrarUsuario);
 
 router.get("/", (req, res) => {
-    console.log("Bienvenido al sistema de raices");
-    console.log("Procesando una peticion de tipo GET")
-    res.json({
-        status: 200,
-        message: "Solicitud recibida a traves del metodo GET"
+    res.render('auth/home', {
+        pagina: 'Inicio',
+        usuario: req.user
     })
 })
+
+// ─── Logout ───────────────────────────────────────────────────────────────
+router.post('/logout', (req, res) => {
+    req.logout((err) => {
+        if (err) return next(err);
+        res.redirect('/auth/login');
+    });
+});
 
 
 
 router.get("/login", formularioLogin);
 router.get("/registro", formularioRegistro);
-router.get("/olvide-password", formularioOlvidePassword);
+router.get("/olvide-password", formularioPassword);
 
 
 router.get("/saludo/:nombre", (req, res) => {
