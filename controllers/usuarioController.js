@@ -1,6 +1,7 @@
 import { check, validationResult } from 'express-validator';
 import Usuario from '../models/Usuario.js';
 import { generarToken } from '../lib/token.js';
+import { emailRegistro } from '../lib/emails.js';
 
 
 const formularioLogin = (req, res) => {
@@ -78,6 +79,13 @@ const registrarUsuario = async (req, res) => {
             token: generarToken()
         });
 
+        //Enviar correo de confirmación
+        emailRegistro({
+            nombre: usuario.nombre,
+            email: usuario.email,
+            token: usuario.token
+        })
+
         // Mostrar mensaje de confirmación
         res.render("templates/mensajes", {
             titulo: "Bienvenido a la página de Bienes Raíces",
@@ -97,6 +105,43 @@ const registrarUsuario = async (req, res) => {
     }
 }
 
+const paginaConfirmacion = async (req, res) => {
+    const { token: tokenCuenta } = req.params;
+    console.log("Confirmando la cuenta asociada al token: ", tokenCuenta);
+
+    //cofirmar que el token es valido
+    const usuarioToken = await Usuario.findOne({ where: { token: tokenCuenta } });
+    console.log(usuarioToken);
+    if (!usuarioToken) {
+        return res.render("templates/mensajes", {
+            titulo: "Error al confirmar la cuenta",
+            msg: `El código de verificación no es válido, por favor inténtalo de nuevo.`
+        });
+    }
+
+    // Actualizar los datos del usuario
+    usuarioToken.token = null;
+    usuarioToken.tokenExpiracion = null;
+    usuarioToken.confirmado = true;
+    await usuarioToken.save();
+
+    res.render("templates/mensajes", {
+        titulo: "Cuenta confirmada",
+        msg: `La cuenta asociada al correo: ${usuarioToken.email}, se ha confirmado exitosamente`
+    });
+}
+
+const formularioRecuperacion = (req, res) => {
+    res.render("auth/recuperarPassword", { pagina: "Recupera tu contraseña" })
+}
 
 
-export { formularioLogin, formularioRegistro, formularioPassword, perfilGithub, registrarUsuario }
+export {
+    formularioLogin,
+    formularioRegistro,
+    formularioPassword,
+    perfilGithub,
+    registrarUsuario,
+    paginaConfirmacion,
+    formularioRecuperacion
+}
