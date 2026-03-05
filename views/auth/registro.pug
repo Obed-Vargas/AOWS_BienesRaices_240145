@@ -42,6 +42,8 @@ block contenido
 
                 //- ── Formulario de registro ───────────────────────────────
                 form.space-y-5(method="POST" action="/auth/registro" noValidate)
+                    input(type="hidden" name="_csrf" value=csrfToken)
+
                     div.px-5
                         label.block.text-sm.uppercase.text-purple-600.mt-2.font-bold(for="nombreUsuario") nombre completo:
                         input#nombreUsuario.w-full.border.border-gray-200.px-3.py-2.rounded-xl.placeholder-gray-400.focus_ring-2.focus_ring-pink-400.outline-none(placeholder= "p.e.: Obed Vargas Luna" name="nombreUsuario" value = usuario ? usuario.nombreUsuario: '' type="text")
@@ -49,7 +51,7 @@ block contenido
                     div.px-5
                         label.block.text-sm.uppercase.text-purple-600.mt-2.font-bold(for="emailUsuario") correo electrónico:
                         input#emailUsuario.w-full.border.border-gray-200.px-3.py-2.rounded-xl.placeholder-gray-400.focus_ring-2.focus_ring-pink-400.outline-none(placeholder= "p.e.: usuario@dominio.com" name="emailUsuario" value = usuario ? usuario.emailUsuario: '' type="email")
-                    
+
                     //- Campo Contraseña con Ojo
                     div.px-5
                         label.block.text-sm.uppercase.text-purple-600.mt-2.font-bold(for="passwordUsuario") Contraseña:
