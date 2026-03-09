@@ -1,8 +1,16 @@
 import express from "express";
 import passport from "passport";
-import { formularioLogin, formularioRegistro, formularioPassword, registrarUsuario } from "../controllers/usuarioController.js";
+import { formularioLogin, formularioRegistro, formularioPassword,
+    registrarUsuario, paginaConfirmacion } from "../controllers/usuarioController.js";
 
 const router = express.Router();
+
+//definir los endpoints GET
+router.get("/login", formularioLogin);
+router.get("/registro", formularioRegistro);
+router.get("/recuperarPassword", formularioPassword);
+router.get("/confirma/:token", paginaConfirmacion)
+
 
 // ─── Rutas Google OAuth ────────────────────────────────────────────────────
 router.get('/google',
