@@ -62,7 +62,20 @@ app.use("/auth", usuarioRoutes)
 app.get("/", usuarioRoutes)
 app.use("/", usuarioRoutes)
 
+
 await connectDB();
+
+//cachear el error
+app.use((err, req, res, next) => {
+    if (err.code === "EBADCSRFTOKEN") {
+        return res.status(403).render("templates/mensajes", {
+            pagina: "Error de seguridad",
+            mensaje: "Token CSRF",
+            msg: "El formulario expiro o fue mnipulado. Recarga la pagina"
+        });
+    }
+    next(err);
+});
 
 
 app.listen(process.env.PORT || 3000, () => {
