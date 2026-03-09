@@ -17,7 +17,7 @@ El proyecto estar basado en una Arquitectura SOA (Service Oriental Architecture)
 |4|Creacion de paginas login y creacion de usuarios|  6 | ✅ finalizado  |
 |5|ORM´s y Base de datos| 4  |  ✅ |
 |6|Insertando registros en la tabla de usuarios|   | ✅  |
-|7|Implementacion de la funcionalidad (Feature), Recuperacion de contraseña (Password recovery)|  ❌ | ❌  |
+|7|Implementacion de la funcionalidad (Feature), Recuperacion de contraseña (Password recovery)|  20 | ✅  |
 |8|Auntenticacion de los usuarios (Auth)|  ❌ | ❌  |
 |9|Definicion de clase propiedades (Property)|  ❌ | ❌  |
 |10|Operaciones CRUD (Create, Read, Update, Delete) de propiedades|  ❌ | ❌  |
