@@ -16,25 +16,24 @@ app.set("views", "./views")
 //Definimos la carpeta publica
 app.use(express.static('public'))
 
-//habilitamos lectura de datos a traves de request
+//activamos la opcion para maniular la cookie
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
-//activamos la opcion para maniular la cookie - almacenamiento en el cliente (navegador)
-app.use(cookieParser());
-app.use(express.json());
-
-//definimos el middleware
+//definimos el middleware de sesión (requerido para csurf y OAuth)
 app.use(session({
     secret: process.env.SESSION_SECRET || "BienesRaices_240145_csrf_secret",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Cambiado a true para asegurar que la sesión se cree
     cookie: {
         httpOnly: true,
         sameSite: "lax",
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000 // 24h
     }
 }));
 
+app.use(cookieParser()); // cookieParser después de session
 
 //Habiotamos el mecanismo para proeccion de CSRF
 app.use(csurf())
@@ -45,14 +44,6 @@ app.use((req, res, next) => {
     next();
 })
 
-
-// ─── Sesiones (requerido para OAuth) ──────────────────────────────────────
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'secreto_bienesraices',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24h
-}));
 
 // ─── Passport ─────────────────────────────────────────────────────────────
 app.use(passport.initialize());
@@ -69,9 +60,8 @@ await connectDB();
 app.use((err, req, res, next) => {
     if (err.code === "EBADCSRFTOKEN") {
         return res.status(403).render("templates/mensajes", {
-            pagina: "Error de seguridad",
-            mensaje: "Token CSRF",
-            msg: "El formulario expiro o fue mnipulado. Recarga la pagina"
+            titulo: "Error de seguridad",
+            msg: "El formulario expiró o fue manipulado. Por favor, recarga la página."
         });
     }
     next(err);
