@@ -1,33 +1,36 @@
 import express from "express";
 import passport from "passport";
 import { formularioLogin, formularioRegistro, formularioPassword,
-    registrarUsuario, paginaConfirmacion } from "../controllers/usuarioController.js";
+    registrarUsuario, paginaConfirmacion, autenticarUsuario,
+    desbloquearCuenta, solicitarRecuperacion, comprobarTokenPassword, nuevoPassword } from "../controllers/usuarioController.js";
 
 const router = express.Router();
 
 //definir los endpoints GET
 router.get("/login", formularioLogin);
+router.post("/login", autenticarUsuario); // Nuevo: Maneja el POST del login
 router.get("/registro", formularioRegistro);
 router.get("/recuperarPassword", formularioPassword);
 router.get("/confirma/:token", paginaConfirmacion)
+router.get("/desbloquear/:token", desbloquearCuenta)
 
 
 // ─── Rutas Google OAuth ────────────────────────────────────────────────────
 router.get('/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
+    passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' })
 );
 router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/auth/registro' }),
-    (req, res) => res.redirect('/')
+    (req, res) => res.redirect('/mis-propiedades')
 );
 
 // ─── Rutas GitHub OAuth ────────────────────────────────────────────────────
 router.get('/github',
-    passport.authenticate('github', { scope: ['user:email'], prompt: 'login' })
+    passport.authenticate('github', { scope: ['user:email'], prompt: 'consent' })
 );
 router.get('/github/callback',
     passport.authenticate('github', { failureRedirect: '/auth/registro' }),
-    (req, res) => res.redirect('/auth/perfil')
+    (req, res) => res.redirect('/mis-propiedades')
 );
 
 // ─── Ruta de Perfil Detallado ─────────────────────────────────────────────
@@ -45,27 +48,42 @@ router.get('/perfil', (req, res) => {
 
 //POST
 router.post("/registro", registrarUsuario);
+router.post("/login", autenticarUsuario); 
 
 router.get("/", (req, res) => {
-    res.render('auth/home', {
-        pagina: 'Inicio',
-        usuario: req.user
-    })
+    res.redirect('/auth/login')
 })
 
-// ─── Logout ───────────────────────────────────────────────────────────────
-router.post('/logout', (req, res) => {
-    req.logout((err) => {
-        if (err) return next(err);
-        res.redirect('/auth/login');
+router.get("/mis-propiedades", (req, res) => {
+    // Si viene de Local login, la sesion tiene req.session.user
+    // Si viene de OAuth, Passport pone al usuario en req.user
+    const usuarioLogueado = req.session.user || req.user;
+    
+    if (!usuarioLogueado) {
+        return res.redirect('/auth/login');
+    }
+
+    res.render('propiedades/mis-propiedades', {
+        pagina: 'Mis Propiedades',
+        usuario: usuarioLogueado
     });
 });
 
+// ─── Logout ───────────────────────────────────────────────────────────────
+router.post('/logout', (req, res, next) => {
+    req.logout((err) => {
+        if (err) return next(err);
+        req.session.destroy(() => {
+            res.clearCookie('connect.sid'); // Destroy the session cookie completely
+            res.redirect('/auth/login');
+        });
+    });
+});
 
-
-router.get("/login", formularioLogin);
-router.get("/registro", formularioRegistro);
 router.get("/olvide-password", formularioPassword);
+router.post("/olvide-password", solicitarRecuperacion);
+router.get("/olvide-password/:token", comprobarTokenPassword);
+router.post("/olvide-password/:token", nuevoPassword);
 
 
 router.get("/saludo/:nombre", (req, res) => {

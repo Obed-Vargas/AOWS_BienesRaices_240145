@@ -1,0 +1,46 @@
+extends ../layout/index
+
+block contenido 
+    header.bg-white.shadow-md
+        .mx-auto.max-w-7xl.px-4.py-4.sm_px-6.lg_px-8.flex.justify-between.items-center
+            h1.text-2xl.font-bold.text-indigo-600 Bienes
+                span.text-black Raíces
+            
+            div.flex.items-center.gap-4
+                if usuario
+                    div.flex.items-center.gap-3
+                        if usuario.foto
+                            img.h-10.w-10.rounded-full.object-cover.border-2.border-indigo-500(src=usuario.foto alt="Foto Perfil")
+                        else 
+                            //- Default avatar icon
+                            .h-10.w-10.rounded-full.bg-indigo-100.flex.items-center.justify-center.border-2.border-indigo-500
+                                svg.h-6.w-6.text-indigo-600(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z")
+                        
+                        span.font-semibold.text-gray-700= usuario.nombre
+                
+                form(method="POST" action="/auth/logout")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    button.bg-rose-500.hover_bg-rose-600.text-white.px-4.py-2.rounded-lg.font-bold.transition(type="submit") Cerrar Sesión
+
+    main.mx-auto.max-w-7xl.px-4.py-8.sm_px-6.lg_px-8
+        h2.text-center.text-3xl.font-extrabold= pagina
+
+        div.mt-10.bg-white.shadow.overflow-hidden.sm_rounded-lg
+            div.px-4.py-5.sm_px-6
+                h3.text-lg.leading-6.font-medium.text-gray-900 Información de la Cuenta
+                p.mt-1.max-w-2xl.text-sm.text-gray-500 Detalles de tu registro y estado de la cuenta.
+            div.border-t.border-gray-200
+                dl
+                    div.bg-gray-50.px-4.py-5.sm_grid.sm_grid-cols-3.sm_gap-4.sm_px-6
+                        dt.text-sm.font-medium.text-gray-500 Nombe Completo
+                        dd.mt-1.text-sm.text-gray-900.sm_mt-0.sm_col-span-2= usuario.nombre
+                    div.bg-white.px-4.py-5.sm_grid.sm_grid-cols-3.sm_gap-4.sm_px-6
+                        dt.text-sm.font-medium.text-gray-500 Correo Electrónico
+                        dd.mt-1.text-sm.text-gray-900.sm_mt-0.sm_col-span-2= usuario.email
+                    div.bg-gray-50.px-4.py-5.sm_grid.sm_grid-cols-3.sm_gap-4.sm_px-6
+                        dt.text-sm.font-medium.text-gray-500 Método de Registro
+                        dd.mt-1.text-sm.text-gray-900.sm_mt-0.sm_col-span-2.uppercase= usuario.proveedor || 'Local'
+
+        div.mt-10.text-center
+            p.text-gray-500 El módulo funcional de Mis Propiedades se implementará aquí en la siguientes fases.

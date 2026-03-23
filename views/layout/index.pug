@@ -6,9 +6,20 @@ html(lang="es")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title .: BienesRaices :. 240145 | #{pagina}
         link(rel="stylesheet", href="/css/styles.css")
+        style.
+            @keyframes fade-out {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+            .alerta-error {
+                transition: all 0.5s ease;
+            } 
+            .fade-out {
+                animation: fade-out 0.5s forwards;
+            }
         
     body.min-h-screen.bg-gray-100.flex.flex-col
-        main(class="mx-auto container mt-10 px-2 flex-grow")
+        main(class="mx-auto container mt-10 px-2 grow")
             block contenido
 
         footer.py-10

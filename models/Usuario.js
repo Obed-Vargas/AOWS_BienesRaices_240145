@@ -83,6 +83,21 @@ const Usuario = db.define('Usuario', {
     foto: {
         type: DataTypes.STRING(255),
         allowNull: true
+    },
+    intentosFallidos: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        field: 'intentos_fallidos'
+    },
+    bloqueado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        field: 'bloqueado'
+    },
+    tokenDesbloqueo: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        field: 'token_desbloqueo'
     }
 
 
@@ -101,6 +116,11 @@ const Usuario = db.define('Usuario', {
             }
         }
     }
-})
+});
+
+//metodos de instancia
+Usuario.prototype.validarPassword = async function(password) {
+    return bcrypt.compare(password, this.password);
+};
 
 export default Usuario;
