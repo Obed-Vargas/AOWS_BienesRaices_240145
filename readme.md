@@ -18,7 +18,7 @@ El proyecto estar basado en una Arquitectura SOA (Service Oriental Architecture)
 |5|ORM´s y Base de datos| 7  |  ✅ |
 |6|Insertando registros en la tabla de usuarios| 20  | ✅  |
 |7|Implementacion de la funcionalidad (Feature), Recuperacion de contraseña (Password recovery)|  7 | ✅  |
-|8|Auntenticacion de los usuarios (Auth)|  15 | ❌  |
+|8|Auntenticacion de los usuarios (Auth)|  15 | ✅  |
 |9|Definicion de clase propiedades (Property)|  ❌ | ❌  |
 |10|Operaciones CRUD (Create, Read, Update, Delete) de propiedades|  ❌ | ❌  |
 |11|Proteccion de rutas y validacion de tokens de sesion (JWT)|  ❌ | ❌  |
