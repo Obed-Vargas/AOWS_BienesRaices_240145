@@ -36,6 +36,7 @@ block contenido
                     .flex-1.border-t.border-gray-200
 
                 form.space-y-5(method="POST" action="/auth/login")
+                    input(type="hidden" name="_csrf" value=csrfToken)
                     div.px-5
                         label.block.text-sm.uppercase.text-gray-500.mt-2.font-bold(for="emailUsuario") correo electrónico:
                         input#emailUsuario.w-full.border.border-gray-300.px-3.py-2.rounded-xl.placeholder-gray-400(placeholder= "p.e.: usuario@dominio.com" name="emailUsuario" type="email")

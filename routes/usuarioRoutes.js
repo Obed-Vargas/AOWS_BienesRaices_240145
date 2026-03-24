@@ -1,15 +1,21 @@
 import express from "express";
 import passport from "passport";
-import { formularioLogin, formularioRegistro, formularioPassword,
-    registrarUsuario, paginaConfirmacion } from "../controllers/usuarioController.js";
+import {
+    formularioLogin, formularioRegistro, formularioPassword,
+    registrarUsuario, paginaConfirmacion, resetearPassword,
+    formularioActualizacionPassword, nuevoPassword, actualizarPassword
+} from "../controllers/usuarioController.js";
 
 const router = express.Router();
 
 //definir los endpoints GET
 router.get("/login", formularioLogin);
 router.get("/registro", formularioRegistro);
+router.get("/olvide-password", formularioPassword);
 router.get("/recuperarPassword", formularioPassword);
 router.get("/confirma/:token", paginaConfirmacion)
+router.get("/olvide-password/:token", formularioActualizacionPassword)
+router.get("/actualizarPassword/:token", formularioActualizacionPassword)
 
 
 // ─── Rutas Google OAuth ────────────────────────────────────────────────────
@@ -45,6 +51,11 @@ router.get('/perfil', (req, res) => {
 
 //POST
 router.post("/registro", registrarUsuario);
+router.post("/olvide-password", resetearPassword);
+router.post("/recuperarPassword", resetearPassword);
+router.post("/olvide-password/:token", nuevoPassword);
+router.post("/actualizarPassword/:token", nuevoPassword);
+router.post("/actualizarPassword", actualizarPassword);
 
 router.get("/", (req, res) => {
     res.render('auth/home', {
@@ -63,9 +74,7 @@ router.post('/logout', (req, res) => {
 
 
 
-router.get("/login", formularioLogin);
-router.get("/registro", formularioRegistro);
-router.get("/olvide-password", formularioPassword);
+// Rutas duplicadas eliminadas
 
 
 router.get("/saludo/:nombre", (req, res) => {
