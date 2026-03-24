@@ -1,6 +1,6 @@
 import { check, validationResult } from 'express-validator';
 import Usuario from '../models/Usuario.js';
-import { generarToken } from '../lib/token.js';
+import { generarToken, generarJWT } from '../lib/token.js';
 import { emailRegistro, emailCuentaBloqueada, emailOlvidePassword } from '../lib/emails.js';
 import bcrypt from 'bcrypt';
 
@@ -194,6 +194,7 @@ const autenticarUsuario = async (req, res) => {
         })
     }
 
+
     console.log("Validando contraseñas");
 
     if(!(await usuario.validarPassword(passwordUsuario))){
@@ -228,11 +229,20 @@ const autenticarUsuario = async (req, res) => {
     usuario.ultimoAcceso = new Date();
     await usuario.save();
 
-    // Guardar el usuario en session
+    console.log("Generando el token JWT");
+    // General un Token JWT
+    const token = generarJWT(usuario.id)
+    console.log(`El token del usuario es: ${token}`);
+
+    // Almacenar el usuario en la sesión
     req.session.user = usuario;
 
-    // Redirigir a 'Mis Propiedades'
-    res.redirect('/mis-propiedades');
+    // Almacenar el token en una cookie
+    return res.cookie('_token', token, {
+        httpOnly: true,
+        // secure: true
+    }).redirect('/mis-propiedades');
+
 }
 
 // FUNCIONES NUEVAS: Desbloqueo y Recuperación
