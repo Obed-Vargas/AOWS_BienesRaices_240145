@@ -42,4 +42,4 @@ Posteriormente se ubicaran imagenes del proyecto
 ```
 
 ### Creado por:
-Obed Vargas Luna - 240145 
+Obed Vargas Luna - 240145
