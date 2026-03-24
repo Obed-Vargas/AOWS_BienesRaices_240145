@@ -1,28 +1,19 @@
 import { check, validationResult } from 'express-validator';
-import bcrypt from 'bcrypt';
 import Usuario from '../models/Usuario.js';
-import { generarToken } from '../lib/token.js';
-import { emailRegistro, emailResetearPassword } from '../lib/emails.js';
+import { generarToken, generarJWT } from '../lib/token.js';
+import { emailRegistro, emailCuentaBloqueada, emailOlvidePassword } from '../lib/emails.js';
+import bcrypt from 'bcrypt';
 
 
 const formularioLogin = (req, res) => {
-    res.render("auth/login", {
-        pagina: "Inicia sesión",
-        csrfToken: req.csrfToken()
-    })
+    res.render("auth/login", { pagina: "Inicia sesión" })
 }
 const formularioRegistro = (req, res) => {
-    res.render("auth/registro", {
-        pagina: "Registrate con nosotros :)",
-        csrfToken: req.csrfToken()
-    })
+    res.render("auth/registro", { pagina: "Registrate con nosotros :)" })
 }
 
 const formularioPassword = (req, res) => {
-    res.render("auth/recuperarPassword", {
-        pagina: "Recupera tu contraseña",
-        csrfToken: req.csrfToken()
-    })
+    res.render("auth/recuperarPassword", { pagina: "Recupera tu contraseña" })
 }
 
 const perfilGithub = (req, res) => {
@@ -71,7 +62,7 @@ const registrarUsuario = async (req, res) => {
         // HAY ERRORES: Volvemos al formulario
         return res.render("auth/registro", {
             pagina: "Error al intentar crear una cuenta.",
-            csrfToken: req.csrfToken(),
+            // Enviamos los errores con el formato que el Pug espera (con .msg)
             errores: resultadoValidacion.array(),
             usuario: {
                 nombreUsuario,
@@ -86,7 +77,8 @@ const registrarUsuario = async (req, res) => {
             nombre: nombreUsuario,
             email: emailUsuario,
             password: passwordUsuario,
-            token: generarToken()
+            token: generarToken(),
+            tokenExpiracion: new Date(Date.now() + 3600000) // 1 hora
         });
 
         //Enviar correo de confirmación
@@ -106,7 +98,6 @@ const registrarUsuario = async (req, res) => {
         console.error(error);
         return res.render("auth/registro", {
             pagina: "Error en el servidor",
-            csrfToken: req.csrfToken(),
             errores: [{ msg: "Hubo un error al intentar guardar el registro." }],
             usuario: {
                 nombreUsuario,
@@ -130,6 +121,13 @@ const paginaConfirmacion = async (req, res) => {
         });
     }
 
+    if (usuarioToken.tokenExpiracion && usuarioToken.tokenExpiracion < new Date()) {
+        return res.render("templates/mensajes", {
+            titulo: "Error al confirmar la cuenta",
+            msg: `El token de confirmación ha expirado por seguridad (1 hora de límite).`
+        });
+    }
+
     // Actualizar los datos del usuario
     usuarioToken.token = null;
     usuarioToken.tokenExpiracion = null;
@@ -143,174 +141,256 @@ const paginaConfirmacion = async (req, res) => {
 }
 
 const formularioRecuperacion = (req, res) => {
-    res.render("auth/recuperarPassword", { pagina: "Ingresa tu correo" })
+    res.render("auth/recuperarPassword", { pagina: "Recupera tu contraseña" })
 }
 
-const formularioActualizacionPassword = async (req, res) => {
-    console.log(req.body)
-    const {token} = req.params;
-    console.log(`el usuario con token: ${token} esta intentando actualizr su contraseña`)
 
-    const usuarioSolicitante = await Usuario.findOne({ where: { token } });
-    if(usuarioSolicitante) {
-        console.log(`el usuario dueño del token es: ${usuarioSolicitante.email}`);
-    }
-
-    res.render("auth/reastrearPassword", {
-        pagina: "Reestablece tu contraseña",
-        csrfToken: req.csrfToken(),
-        token
-    })
-}
-
-const actualizarPassword = async (req, res) => {
-    // Validar los campos
-    const { password_actual, password, token } = req.body;
-
-    await check('password_actual').notEmpty().withMessage('La contraseña actual es obligatoria').run(req);
-    await check('password').isLength({ min: 8 }).withMessage('La nueva contraseña debe ser de al menos 8 caracteres').run(req);
-
-    let resultado = validationResult(req);
-
-    // Verificar si hay errores de validación
-    if (!resultado.isEmpty()) {
-        return res.render('auth/reastrearPassword', {
-            pagina: 'Reestablece tu Password',
-            csrfToken: req.csrfToken(),
-            errores: resultado.array(),
-            token
-        });
-    }
-
-    // Identificar al usuario por el token
-    const usuario = await Usuario.findOne({ where: { token } });
-
-    if (!usuario) {
-        return res.render('auth/reastrearPassword', {
-            pagina: 'Reestablece tu Password',
-            csrfToken: req.csrfToken(),
-            errores: [{ msg: 'Hubo un error al intentar validar tu información, intenta de nuevo.' }],
-            token
-        });
-    }
-
-    // Verificar la contraseña actual
-    const passwordValido = await bcrypt.compare(password_actual, usuario.password);
-    if (!passwordValido) {
-        return res.render('auth/reastrearPassword', {
-            pagina: 'Reestablece tu Password',
-            csrfToken: req.csrfToken(),
-            errores: [{ msg: 'La contraseña actual es incorrecta' }],
-            token
-        });
-    }
-
-    // Hashear el nuevo password y guardar cambios
-    usuario.password = password;
-    usuario.token = null;
-    await usuario.save();
-
-    res.render('templates/mensajes', {
-        titulo: 'Password Reestablecido',
-        msg: 'El password se guardó correctamente'
-    });
-}
-
-const resetearPassword = async (req, res) => {
-    const { emailUsuario } = req.body;
-
-    //Validaciones del frontend
-    await check('emailUsuario').notEmpty().withMessage('El correo electrónico no puede ser vacio')
-    .isEmail().withMessage('El correo electrónico no tiene un formato adecuado').run(req); 
-
-    //Aplicar las validaciones
+const autenticarUsuario = async (req, res) => {
+    // Validación
+    console.log("El usuario desea autenticarse en la plataforma...");
+    const { emailUsuario, passwordUsuario } = req.body; 
+    console.log(`Un usuario: ${emailUsuario} quiere ingresar al sistema...`);
+    
+    //Validacion de front (campos vacios)
+    await check('emailUsuario').notEmpty().withMessage("El correo electrónico no puede estar vacío").isEmail().withMessage("El correo electrónico no tiene un formato adecuado").run(req);
+    await check('passwordUsuario').notEmpty().withMessage("La contraseña no puede estar vacía").run(req);
+    
     let resultadoValidacion = validationResult(req);
-
-    if(!resultadoValidacion.isEmpty())
-    {
-        res.render("auth/recuperarPassword", {
-            pagina: "Error, correo invalido",
+    if (!resultadoValidacion.isEmpty()) {
+        return res.render("auth/login", {
+            pagina: "Inicia sesión",
             errores: resultadoValidacion.array(),
-            usuario: {emailUsuario: emailUsuario}
+            usuario: {
+                email: emailUsuario
+            }
+        });
+    }
+
+    // Comprobar si el usuario existe
+    const usuario = await Usuario.findOne({ where: { email: emailUsuario } })
+    if (!usuario) {
+        return res.render('auth/login', {
+            pagina: 'Error al ingresar a la pagina',
+            csrfToken: req.csrfToken(),
+            errores: [{ msg: `No existe un usuario asociado a: ${emailUsuario}` }]
         })
     }
 
-    // Identificar el usuario
+    // Comprobar si el usuario está confirmado
+    if (!usuario.confirmado) {
+        return res.render('auth/login', {
+            pagina: 'Error al intentar ingresar a la plataforma',
+            csrfToken: req.csrfToken(),
+            errores: [{ msg: 'Tu cuenta no está confirmada' }]
+        })
+    }
+
+    // Comprobar si la cuenta está bloqueada
+    if (usuario.bloqueado) {
+        return res.render('auth/login', {
+            pagina: 'Cuenta Bloqueada',
+            csrfToken: req.csrfToken(),
+            errores: [{ msg: 'Tu cuenta ha sido bloqueada por exceso de intentos fallidos. Revisa tu correo electrónico para desbloquearla.' }]
+        })
+    }
+
+
+    console.log("Validando contraseñas");
+
+    if(!(await usuario.validarPassword(passwordUsuario))){
+        usuario.intentosFallidos += 1;
+        
+        let errorMsg = 'Contraseña incorrecta, por favor intentalo de nuevo';
+        
+        if(usuario.intentosFallidos >= 5) {
+            usuario.bloqueado = true;
+            usuario.tokenDesbloqueo = generarToken();
+            errorMsg = 'Tu cuenta ha sido bloqueada por exceso de intentos fallidos. Revisa tu correo.';
+            
+            // Send email
+            emailCuentaBloqueada({
+                nombre: usuario.nombre,
+                email: usuario.email,
+                token: usuario.tokenDesbloqueo
+            });
+        }
+        
+        await usuario.save();
+
+        return res.render('auth/login', {
+            pagina: 'Error al intentar ingresar a la plataforma',
+            csrfToken: req.csrfToken(),
+            errores: [{ msg: errorMsg }]
+        });
+    }
+
+    // Autenticación correcta, resetear intentos fallidos
+    usuario.intentosFallidos = 0;
+    usuario.ultimoAcceso = new Date();
+    await usuario.save();
+
+    console.log("Generando el token JWT");
+    // General un Token JWT
+    const token = generarJWT(usuario.id)
+    console.log(`El token del usuario es: ${token}`);
+
+    // Almacenar el usuario en la sesión
+    req.session.user = usuario;
+
+    // Almacenar el token en una cookie
+    return res.cookie('_token', token, {
+        httpOnly: true,
+        // secure: true
+    }).redirect('/mis-propiedades');
+
+}
+
+// FUNCIONES NUEVAS: Desbloqueo y Recuperación
+
+const desbloquearCuenta = async (req, res) => {
+    const { token } = req.params;
+
+    const usuario = await Usuario.findOne({ where: { tokenDesbloqueo: token } });
+    
+    if (!usuario) {
+        return res.render("templates/mensajes", {
+            titulo: "Error al desbloquear la cuenta",
+            msg: `El código de desbloqueo no es válido o ya fue utilizado.`
+        });
+    }
+
+    usuario.bloqueado = false;
+    usuario.intentosFallidos = 0;
+    usuario.tokenDesbloqueo = null;
+    await usuario.save();
+
+    res.render("templates/mensajes", {
+        titulo: "Cuenta Desbloqueada",
+        msg: `Tu cuenta ha sido desbloqueada exitosamente. Ya puedes iniciar sesión.`,
+        boton: { url: '/auth/login', texto: 'Iniciar Sesión' }
+    });
+}
+
+const solicitarRecuperacion = async (req, res) => {
+    // Validacion
+    await check('emailUsuario').isEmail().withMessage('Debe ser un email válido').run(req);
+    
+    let resultadoValidacion = validationResult(req);
+    if (!resultadoValidacion.isEmpty()) {
+        return res.render('auth/recuperarPassword', {
+            pagina: 'Recupera tu contraseña',
+            csrfToken: req.csrfToken(),
+            errores: resultadoValidacion.array()
+        });
+    }
+
+    const { emailUsuario } = req.body;
     const usuario = await Usuario.findOne({ where: { email: emailUsuario } });
 
     if (!usuario) {
-        return res.render("auth/recuperarPassword", {
-            pagina: "Recupera tu contraseña",
-            csrfToken: req.csrfToken(),
-            errores: [{ msg: 'este correo no existe' }]});
-    }
-
-
-
-
-    // Validación 2
-    if (!usuario.confirmado) {
         return res.render('auth/recuperarPassword', {
-            pagina: "Recupera tu contraseña",
+            pagina: 'Error',
             csrfToken: req.csrfToken(),
-            errores: [{ msg: `La cuenta asociada al correo: ${emailUsuario}, no ha sido validada.` }]
+            errores: [{ msg: 'El correo electrónico no se encuentra registrado.' }]
         });
     }
-    // Generar un nuevo token
+
+    if (!usuario.confirmado) {
+        return res.render('auth/recuperarPassword', {
+            pagina: 'Error',
+            csrfToken: req.csrfToken(),
+            errores: [{ msg: 'primero debes de confirmar tu cuenta' }]
+        });
+    }
+
+    // Generar nuevo token
     usuario.token = generarToken();
+    usuario.tokenExpiracion = new Date(Date.now() + 3600000); // 1 hora de límite
     await usuario.save();
 
-    //enviar el codigo por correo
-    emailResetearPassword({
-        email: usuario.email,
+    // Enviar email
+    emailOlvidePassword({
         nombre: usuario.nombre,
+        email: usuario.email,
         token: usuario.token
-    })
-    //responder con una vista de correo enviado
-    res.render('templates/mensajes', {
-        titulo: 'Reestablece tu Password',
-        msg: 'Hemos enviado un email con las instrucciones'
+    });
+
+    res.render("templates/mensajes", {
+        titulo: "Correo enviado",
+        msg: `Hemos enviado un correo a ${emailUsuario} con las instrucciones para restablecer tu contraseña.`
+    });
+}
+
+const comprobarTokenPassword = async (req, res) => {
+    const { token } = req.params;
+    const usuario = await Usuario.findOne({ where: { token } });
+
+    if (!usuario) {
+        return res.render("templates/mensajes", {
+            titulo: "Error",
+            msg: `El código de recuperación no es válido.`
+        });
+    }
+
+    if (usuario.tokenExpiracion && usuario.tokenExpiracion < new Date()) {
+        return res.render("templates/mensajes", {
+            titulo: "Error",
+            msg: `El token de seguridad ha expirado por límite de tiempo (1 hora). Por favor solicita uno nuevo.`
+        });
+    }
+
+    res.render('auth/reset-password', {
+        pagina: 'Restablecer Tu Contraseña',
+        csrfToken: req.csrfToken()
     });
 }
 
 const nuevoPassword = async (req, res) => {
-    // Validar el email y el password
-    const { email, password } = req.body;
-    const { token } = req.params;
-
-    await check('email').isEmail().withMessage('Eso no parece un email').run(req);
-    await check('password').isLength({ min: 8 }).withMessage('El password debe ser de al menos 8 caracteres').run(req);
-
-    let resultado = validationResult(req);
-
-    // Verificar si hay errores
-    if (!resultado.isEmpty()) {
-        return res.render('auth/reastrearPassword', {
-            pagina: 'Reestablece tu Password',
+    // Validar el password
+    await check('passwordUsuario').isLength({ min: 8 }).withMessage('El password debe ser de al menos 8 caracteres').run(req);
+    
+    let resultadoValidacion = validationResult(req);
+    if (!resultadoValidacion.isEmpty()) {
+        return res.render('auth/reset-password', {
+            pagina: 'Restablecer Tu Contraseña',
             csrfToken: req.csrfToken(),
-            errores: resultado.array()
+            errores: resultadoValidacion.array()
         });
     }
 
-    // Identificar quién hace el cambio
-    const usuario = await Usuario.findOne({ where: { token, email } });
+    const { token } = req.params;
+    const { passwordUsuario } = req.body;
+
+    const usuario = await Usuario.findOne({ where: { token } });
 
     if (!usuario) {
-        return res.render('auth/reastrearPassword', {
-            pagina: 'Reestablece tu Password',
-            csrfToken: req.csrfToken(),
-            errores: [{ msg: 'El correo no coincide con el token solicitado o el token no es válido' }]
+        return res.render("templates/mensajes", {
+            titulo: "Error",
+            msg: `El token no es válido.`
         });
     }
 
-    // Hashear el nuevo password y guardar cambios
-    usuario.password = password;
+    if (usuario.tokenExpiracion && usuario.tokenExpiracion < new Date()) {
+        return res.render("templates/mensajes", {
+            titulo: "Error",
+            msg: `El token de recuperación ha vencido por caducidad (límite 1 hora). Por favor solicita uno nuevo.`
+        });
+    }
+
+    // Actualizar password
+    usuario.password = passwordUsuario; // trigger hashing in model before update? Wait, we might need a little logic here
+    // In Usuario model, we only hash on beforeCreate! Let's check model.
+    // WAIT: Model only has `beforeCreate`. If we update password, we must hash it.
+    const salt = await bcrypt.genSalt(10);
+    usuario.password = await bcrypt.hash(passwordUsuario, salt);
+    
     usuario.token = null;
     await usuario.save();
 
-    res.render('templates/mensajes', {
-        titulo: 'Password Reestablecido',
-        msg: 'El password se guardó correctamente'
+    res.render("templates/mensajes", {
+        titulo: "Contraseña Restablecida",
+        msg: `Tu contraseña ha sido guardada correctamente.`,
+        boton: { url: '/auth/login', texto: 'Iniciar Sesión' }
     });
 }
 
@@ -322,8 +402,9 @@ export {
     registrarUsuario,
     paginaConfirmacion,
     formularioRecuperacion,
-    resetearPassword,
-    formularioActualizacionPassword,
-    nuevoPassword,
-    actualizarPassword
+    autenticarUsuario,
+    desbloquearCuenta,
+    solicitarRecuperacion,
+    comprobarTokenPassword,
+    nuevoPassword     
 }

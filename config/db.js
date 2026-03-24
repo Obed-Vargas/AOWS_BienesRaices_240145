@@ -50,7 +50,12 @@ export const connectDB = async () => {
         await sequelize.authenticate();
         console.log("✅ Conexión a MySQL establecida correctamente.");
     } catch (error) {
-        console.error("❌ No se pudo conectar a la base de datos:", error);
+        if (error.original && error.original.code === 'ECONNREFUSED') {
+            console.error("\n❌ Error: No se pudo conectar a MySQL.");
+            console.error("👉 Asegúrate de que tu servidor de base de datos (XAMPP, Laragon o el servicio MySQL) esté ENCENDIDO.\n");
+        } else {
+            console.error("❌ No se pudo conectar a la base de datos:", error);
+        }
         process.exit(1);
     }
 

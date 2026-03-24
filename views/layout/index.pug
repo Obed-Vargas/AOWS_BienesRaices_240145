@@ -6,17 +6,22 @@ html(lang="es")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title .: BienesRaices :. 240145 | #{pagina}
         link(rel="stylesheet", href="/css/styles.css")
+        style.
+            @keyframes fade-out {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+            .alerta-error {
+                transition: all 0.5s ease;
+            } 
+            .fade-out {
+                animation: fade-out 0.5s forwards;
+            }
         
-    body.min-h-screen.bg-gray-100.flex.flex-col
-        main(class="mx-auto container mt-10 px-2 flex-grow")
+    body.min-h-screen.bg-gray-50.flex.flex-col.antialiased
+        
+        main(class="container mx-auto mt-12 px-4 grow max-w-7xl")
             block contenido
-
-        footer.py-10
-            .container.mx-auto.flex.flex-col.items-center.justify-center.space-y-4
-                p.text-center.text-gray-500.font-bold.uppercase Bienes 
-                    span.font-normal Raíces
-                p.text-center.text-gray-400.text-sm &copy; 2026 Todos los derechos reservados
-                p.text-center.text-indigo-600.font-semibold.text-xs 240145 | Obed Vargas Luna
 
         block scripts
         
